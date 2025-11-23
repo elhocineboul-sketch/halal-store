@@ -3,171 +3,541 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Halal Store Mobile App</title>
+  <title>Halal Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    }
-    * {
-      box-sizing: border-box;
-    }
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
   <script>
-    const { useState, useEffect } = React;
-    const { createRoot } = ReactDOM;
+    import React, { useState, useEffect } from 'react';
+import { ShoppingCart, Home, Search, Bell, User, Plus, Minus, Star, Heart, ChevronLeft, Settings, X, Trash2, Moon, Sun, Navigation, Truck, Clock, CheckCircle, Edit, MapPin, Package, MessageCircle } from 'lucide-react';
 
-    // Simple SVG Icons
-    const Icon = ({ d, className = "w-6 h-6" }) => (
-      React.createElement('svg', { className, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
-        React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d })
-      )
-    );
+const HalalStoreApp = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [cart, setCart] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState('en');
+  const [showSettings, setShowSettings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [userName, setUserName] = useState('');
+  const [showUserLogin, setShowUserLogin] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [viewingOrder, setViewingOrder] = useState(null);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(null);
+  const [deliveryCode, setDeliveryCode] = useState('');
 
-    // Halal Store App Component
-    function HalalStoreApp() {
-      const [currentPage, setCurrentPage] = useState('home');
-      const [cart, setCart] = useState([]);
-      const [darkMode, setDarkMode] = useState(false);
-      const [language, setLanguage] = useState('en');
-      const [showSettings, setShowSettings] = useState(false);
-      const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-      const [userName, setUserName] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [newSlide, setNewSlide] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+    image: '',
+    cta: 'Shop Now',
+    discount: ''
+  });
 
-      const products = [
-        { id: 1, name: 'Best Beef Steak', price: 150, oldPrice: 200, image: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=400', category: 'beef', badge: 'BEST' },
-        { id: 2, name: 'Chicken Premium', price: 170, oldPrice: 220, image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400', category: 'chicken', badge: 'NEW' },
-        { id: 3, name: 'Lamb Chops', price: 280, oldPrice: 320, image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400', category: 'lamb', badge: 'PREMIUM' }
-      ];
+  const [slides, setSlides] = useState([
+    {
+      id: 1,
+      title: 'Fresh Halal Meats',
+      subtitle: 'Premium Quality for Your Family',
+      description: 'Discover our selection of certified halal products',
+      image: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=1200&h=500&fit=crop',
+      cta: 'Shop Now',
+      discount: '30% OFF'
+    },
+    {
+      id: 2,
+      title: 'Best Prices Guaranteed',
+      subtitle: 'Save More Every Day',
+      description: 'Special offers on all products',
+      image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=1200&h=500&fit=crop',
+      cta: 'View Deals',
+      discount: '25% OFF'
+    },
+    {
+      id: 3,
+      title: 'Fast Delivery',
+      subtitle: 'Get Your Order in 30 Minutes',
+      description: 'Free delivery on orders over $50',
+      image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=1200&h=500&fit=crop',
+      cta: 'Order Now',
+      discount: 'FREE SHIPPING'
+    }
+  ]);
 
-      const t = {
-        en: { halalStore: 'Halal Store', home: 'Home', cart: 'Cart', profile: 'Profile', contact: 'Contact', addToCart: 'Add to Cart', total: 'Total', checkout: 'Checkout' },
-        es: { halalStore: 'Tienda Halal', home: 'Inicio', cart: 'Carrito', profile: 'Perfil', contact: 'Contacto', addToCart: 'Añadir', total: 'Total', checkout: 'Pagar' },
-        ar: { halalStore: 'متجر حلال', home: 'الرئيسية', cart: 'السلة', profile: 'الملف', contact: 'اتصل بنا', addToCart: 'أضف', total: 'الإجمالي', checkout: 'إتمام' }
-      }[language];
+  useEffect(() => {
+    if (!isPaused && slides && slides.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [isPaused, slides]);
 
-      const addToCart = (product) => {
-        const existing = cart.find(item => item.id === product.id);
-        if (existing) {
-          setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
-        } else {
-          setCart([...cart, { ...product, quantity: 1 }]);
-        }
-      };
+  const nextSlide = () => {
+    if (slides && slides.length > 0) {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }
+  };
 
-      const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const bg = darkMode ? 'bg-gray-900' : 'bg-white';
-      const text = darkMode ? 'text-white' : 'text-gray-800';
+  const prevSlide = () => {
+    if (slides && slides.length > 0) {
+      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    }
+  };
 
-      return React.createElement('div', { className: `${bg} min-h-screen` },
-        // Header
-        React.createElement('div', { className: `${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 shadow-lg sticky top-0 z-20` },
-          React.createElement('div', { className: 'max-w-md mx-auto flex justify-between items-center' },
-            React.createElement('h1', { className: `text-2xl font-bold ${text}` }, t.halalStore),
-            React.createElement('button', {
-              onClick: () => setShowSettings(!showSettings),
-              className: 'w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center'
-            }, '⚙️')
-          )
-        ),
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    oldPrice: '',
+    category: 'beef',
+    image: '',
+    badge: ''
+  });
 
-        // Content
-        React.createElement('div', { className: 'max-w-md mx-auto p-6' },
-          currentPage === 'home' && React.createElement('div', null,
-            React.createElement('h2', { className: `text-xl font-bold ${text} mb-4` }, 'Products'),
-            React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
-              products.map(product =>
-                React.createElement('div', { key: product.id, className: `${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md overflow-hidden` },
-                  React.createElement('img', { src: product.image, className: 'w-full h-32 object-cover' }),
-                  React.createElement('div', { className: 'p-3' },
-                    React.createElement('p', { className: `font-bold ${text} text-sm` }, product.name),
-                    React.createElement('div', { className: 'flex justify-between items-center mt-2' },
-                      React.createElement('span', { className: 'text-emerald-600 font-bold' }, product.price + ' CAD'),
-                      React.createElement('button', {
-                        onClick: () => addToCart(product),
-                        className: 'bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm'
-                      }, t.addToCart)
-                    )
-                  )
-                )
-              )
-            )
-          ),
-
-          currentPage === 'cart' && React.createElement('div', null,
-            React.createElement('h2', { className: `text-xl font-bold ${text} mb-4` }, t.cart),
-            cart.length === 0 ? React.createElement('p', { className: text }, 'Cart is empty') :
-            React.createElement('div', null,
-              cart.map(item =>
-                React.createElement('div', { key: item.id, className: `${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 rounded-xl mb-3` },
-                  React.createElement('p', { className: `font-bold ${text}` }, item.name),
-                  React.createElement('p', { className: 'text-emerald-600' }, `${item.quantity} x ${item.price} CAD`)
-                )
-              ),
-              React.createElement('div', { className: 'mt-6 p-4 bg-emerald-100 rounded-xl' },
-                React.createElement('p', { className: 'text-xl font-bold' }, `${t.total}: ${cartTotal} CAD`),
-                React.createElement('button', {
-                  className: 'w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mt-3',
-                  onClick: () => alert('Order placed!')
-                }, t.checkout)
-              )
-            )
-          )
-        ),
-
-        // Settings Modal
-        showSettings && React.createElement('div', { className: 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6' },
-          React.createElement('div', { className: `${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full` },
-            React.createElement('h3', { className: `text-xl font-bold ${text} mb-4` }, 'Settings'),
-            React.createElement('div', { className: 'space-y-4' },
-              React.createElement('button', {
-                onClick: () => setLanguage(language === 'en' ? 'es' : language === 'es' ? 'ar' : 'en'),
-                className: 'w-full bg-blue-100 p-3 rounded-xl font-bold'
-              }, `Language: ${language.toUpperCase()}`),
-              React.createElement('button', {
-                onClick: () => setDarkMode(!darkMode),
-                className: 'w-full bg-purple-100 p-3 rounded-xl font-bold'
-              }, darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'),
-              React.createElement('button', {
-                onClick: () => setShowSettings(false),
-                className: 'w-full bg-red-100 p-3 rounded-xl font-bold'
-              }, 'Close')
-            )
-          )
-        ),
-
-        // Bottom Navigation
-        React.createElement('div', { className: 'fixed bottom-0 left-0 right-0 bg-gradient-to-r from-emerald-800 to-teal-700 p-4 shadow-2xl' },
-          React.createElement('div', { className: 'max-w-md mx-auto flex justify-around' },
-            ['home', 'cart', 'contact', 'profile'].map(page =>
-              React.createElement('button', {
-                key: page,
-                onClick: () => page === 'contact' ? window.open('https://wa.me/573215874058', '_blank') : setCurrentPage(page),
-                className: `flex flex-col items-center ${currentPage === page ? 'text-white' : 'text-white/60'}`
-              },
-                React.createElement('div', { className: 'text-2xl' }, 
-                  page === 'home' ? '🏠' : page === 'cart' ? '🛒' : page === 'contact' ? '💬' : '👤'
-                ),
-                React.createElement('span', { className: 'text-xs mt-1' }, t[page] || page)
-              )
-            )
-          )
-        )
-      );
+  const handleSlideImageUpload = (e, isEditing = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('❌ Please select an image file!');
+      return;
     }
 
-    // Render App
-    const root = createRoot(document.getElementById('root'));
-    root.render(React.createElement(HalalStoreApp));
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result;
+      if (isEditing && editingSlide) {
+        setEditingSlide({...editingSlide, image: result});
+      } else {
+        setNewSlide({...newSlide, image: result});
+      }
+    };
+    reader.onerror = () => {
+      alert('❌ Error reading file!');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddSlide = () => {
+    if (!newSlide.title || !newSlide.image) {
+      alert('Please fill Title and Image!');
+      return;
+    }
+
+    const slide = {
+      id: Date.now(),
+      title: newSlide.title,
+      subtitle: newSlide.subtitle,
+      description: newSlide.description,
+      image: newSlide.image,
+      cta: newSlide.cta || 'Shop Now',
+      discount: newSlide.discount
+    };
+
+    setSlides([...slides, slide]);
+    setNewSlide({
+      title: '',
+      subtitle: '',
+      description: '',
+      image: '',
+      cta: 'Shop Now',
+      discount: ''
+    });
+    alert('✅ Slide added successfully!');
+  };
+
+  const handleUpdateSlide = () => {
+    if (!editingSlide) return;
+    
+    setSlides(slides.map(s => 
+      s.id === editingSlide.id ? editingSlide : s
+    ));
+    setEditingSlide(null);
+    alert('✅ Slide updated!');
+  };
+
+  const handleDeleteSlide = (id) => {
+    if (slides.length <= 1) {
+      alert('Cannot delete the last slide!');
+      return;
+    }
+    if (window.confirm('Delete this slide?')) {
+      setSlides(slides.filter(s => s.id !== id));
+      alert('✅ Slide deleted!');
+    }
+  };
+
+  const handleProductImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('❌ Please select an image file!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewProduct({...newProduct, image: reader.result});
+    };
+    reader.onerror = () => {
+      alert('❌ Error reading file!');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleWhatsAppContact = () => {
+    window.open('https://wa.me/573215874058', '_blank');
+  };
+
+  const handleGmailRegister = () => {
+    handleGmailLogin();
+  };
+  
+  const translations = {
+    en: { halalStore: 'Halal Store', home: 'Home', cart: 'Cart', alerts: 'Alerts', profile: 'Profile', settings: 'Settings', language: 'Language', darkMode: 'Dark Mode', enableLocation: 'Enable GPS', locationEnabled: 'GPS Active', adminLogin: 'Admin Login', userLogin: 'User Login', register: 'Register', login: 'Login', logout: 'Logout', welcome: 'Welcome', myOrders: 'My Orders', myProfile: 'My Profile', search: 'Search products...', noResults: 'No products found', email: 'Email', password: 'Password', categories: 'Categories', all: 'All', beef: 'Beef', chicken: 'Chicken', lamb: 'Lamb', addToCart: 'Add to Cart', total: 'Total', quantity: 'Quantity', checkout: 'Checkout', preparing: 'Preparing', outForDelivery: 'Out for Delivery', delivered: 'Delivered', trackOrder: 'Track Order', orderPlaced: 'Order Placed!', estimatedTime: 'Est. Time', wrongCredentials: 'Wrong email or password!', orderNumber: 'Order #', inProgress: 'In progress...', completed: 'Completed', driverOnWay: 'Driver on the way...', waiting: 'Waiting...', locationPermission: 'Location permission granted', locationDenied: 'Location permission denied', contact: 'Contact' },
+    es: { halalStore: 'Tienda Halal', home: 'Inicio', cart: 'Carrito', alerts: 'Alertas', profile: 'Perfil', settings: 'Ajustes', language: 'Idioma', darkMode: 'Modo Oscuro', enableLocation: 'Activar GPS', locationEnabled: 'GPS Activo', adminLogin: 'Admin', userLogin: 'Iniciar Sesión', register: 'Registrarse', login: 'Entrar', logout: 'Salir', welcome: 'Bienvenido', myOrders: 'Mis Pedidos', myProfile: 'Mi Perfil', search: 'Buscar productos...', noResults: 'No se encontraron productos', email: 'Correo', password: 'Contraseña', categories: 'Categorías', all: 'Todo', beef: 'Res', chicken: 'Pollo', lamb: 'Cordero', addToCart: 'Añadir', total: 'Total', quantity: 'Cantidad', checkout: 'Pagar', preparing: 'Preparando', outForDelivery: 'En Camino', delivered: 'Entregado', trackOrder: 'Rastrear', orderPlaced: '¡Pedido Realizado!', estimatedTime: 'Tiempo Est.', wrongCredentials: '¡Correo o contraseña incorrectos!', orderNumber: 'Pedido #', inProgress: 'En progreso...', completed: 'Completado', driverOnWay: 'Conductor en camino...', waiting: 'Esperando...', locationPermission: 'Permiso de ubicación concedido', locationDenied: 'Permiso de ubicación denegado', contact: 'Contacto' },
+    ar: { halalStore: 'متجر حلال', home: 'الرئيسية', cart: 'السلة', alerts: 'التنبيهات', profile: 'الملف', settings: 'الإعدادات', language: 'اللغة', darkMode: 'وضع ليلي', enableLocation: 'تفعيل GPS', locationEnabled: 'GPS نشط', adminLogin: 'المسؤول', userLogin: 'تسجيل الدخول', register: 'إنشاء حساب', login: 'دخول', logout: 'تسجيل خروج', welcome: 'مرحباً', myOrders: 'طلباتي', myProfile: 'ملفي الشخصي', search: 'بحث عن المنتجات...', noResults: 'لا توجد منتجات', email: 'البريد', password: 'كلمة المرور', categories: 'الفئات', all: 'الكل', beef: 'لحم بقر', chicken: 'دجاج', lamb: 'خروف', addToCart: 'أضف', total: 'الإجمالي', quantity: 'الكمية', checkout: 'إتمام', preparing: 'قيد التحضير', outForDelivery: 'خرج للتوصيل', delivered: 'تم التوصيل', trackOrder: 'تتبع', orderPlaced: 'تم الطلب!', estimatedTime: 'الوقت المتوقع', wrongCredentials: 'البريد أو كلمة المرور خاطئة!', orderNumber: 'طلب #', inProgress: 'قيد التنفيذ...', completed: 'مكتمل', driverOnWay: 'السائق في الطريق...', waiting: 'انتظار...', locationPermission: 'تم منح إذن الموقع', locationDenied: 'تم رفض إذن الموقع', contact: 'اتصل بنا' }
+  };
+  const t = translations[language];
+
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      name: 'Best Beef Steak',
+      price: 150,
+      oldPrice: 200,
+      rating: 4.6,
+      image: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=500&h=400&fit=crop',
+      category: 'beef',
+      badge: 'BEST'
+    },
+    {
+      id: 2,
+      name: 'Chicken Premium',
+      price: 170,
+      oldPrice: 220,
+      rating: 4.5,
+      image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=400&fit=crop',
+      category: 'chicken',
+      badge: 'NEW'
+    },
+    {
+      id: 3,
+      name: 'Lamb Chops',
+      price: 280,
+      oldPrice: 320,
+      rating: 4.8,
+      image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=500&h=400&fit=crop',
+      category: 'lamb',
+      badge: 'PREMIUM'
+    },
+    {
+      id: 4,
+      name: 'Angus Beef',
+      price: 220,
+      oldPrice: 280,
+      rating: 4.7,
+      image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=500&h=400&fit=crop',
+      category: 'beef',
+      badge: 'PREMIUM'
+    },
+    {
+      id: 5,
+      name: 'Organic Chicken',
+      price: 145,
+      rating: 4.4,
+      image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=400&fit=crop',
+      category: 'chicken',
+      badge: ''
+    }
+  ]);
+
+  const categories = [
+    { id: 'all', name: t.all, icon: '🛒' },
+    { id: 'beef', name: t.beef, icon: '🥩' },
+    { id: 'chicken', name: t.chicken, icon: '🍗' },
+    { id: 'lamb', name: t.lamb, icon: '🐑' }
+  ];
+
+  const requestLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setLocationEnabled(true);
+          alert(t.locationPermission);
+        },
+        (error) => {
+          setLocationEnabled(false);
+          alert(t.locationDenied);
+        }
+      );
+    } else {
+      alert('GPS not supported');
+    }
+  };
+
+  const filteredProducts = activeCategory === 'all' ? products : products.filter(p => p.category === activeCategory);
+
+  const searchedProducts = searchQuery.trim() === '' 
+    ? filteredProducts 
+    : filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+  const handleUserLogin = () => {
+    if (userEmail.trim() && userPassword.trim()) {
+      setIsUserLoggedIn(true);
+      setUserName(userEmail.split('@')[0]);
+      setShowUserLogin(false);
+      setUserEmail('');
+      setUserPassword('');
+      setCurrentPage('profile');
+      alert('✅ Welcome back!');
+    } else {
+      alert('❌ Please enter email and password!');
+    }
+  };
+
+  const handleGmailLogin = () => {
+    // Simulate Gmail login
+    const gmailUser = 'user' + Math.floor(Math.random() * 1000);
+    setIsUserLoggedIn(true);
+    setUserName(gmailUser);
+    setShowUserLogin(false);
+    setCurrentPage('profile');
+    alert('✅ Logged in with Gmail!');
+  };
+
+  const handleUserLogout = () => {
+    setIsUserLoggedIn(false);
+    setUserName('');
+    setCurrentPage('home');
+    alert('👋 Logged out successfully!');
+  };
+
+  const addToCart = (product, qty) => {
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+      setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + qty } : item));
+    } else {
+      setCart([...cart, { ...product, quantity: qty }]);
+    }
+  };
+
+  const handleCheckout = () => {
+    const code = Math.floor(1000 + Math.random() * 9000);
+    const newOrder = {
+      id: Date.now(),
+      items: [...cart],
+      total: (cartTotal + 10 + cartTotal * 0.13).toFixed(2),
+      status: 'preparing',
+      estimatedTime: '30-45 min',
+      timestamp: Date.now(),
+      customerName: 'Customer #' + Math.floor(Math.random() * 1000),
+      accepted: false,
+      deliveryCode: code,
+      paymentMethod: 'nequi',
+      nequiNumber: '+57 321 5874058'
+    };
+    setOrders([newOrder, ...orders]);
+    setCart([]);
+    setSelectedOrder(newOrder);
+    setCurrentPage('tracking');
+  };
+
+  const handleAcceptOrder = (orderId) => {
+    setOrders(orders.map(o => 
+      o.id === orderId ? { ...o, accepted: true, status: 'preparing' } : o
+    ));
+    alert('✅ Order accepted!');
+  };
+
+  const handleMarkAsDelivery = (orderId) => {
+    setOrders(orders.map(o => 
+      o.id === orderId ? { ...o, status: 'outForDelivery' } : o
+    ));
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: 'outForDelivery' });
+    }
+    alert('✅ Marked as out for delivery!');
+  };
+
+  const handleMarkAsDelivered = (orderId) => {
+    setConfirmingDelivery(orderId);
+  };
+
+  const handleConfirmDelivery = () => {
+    const order = orders.find(o => o.id === confirmingDelivery);
+    if (!order) return;
+
+    if (deliveryCode.trim() === order.deliveryCode.toString()) {
+      setOrders(orders.map(o => 
+        o.id === confirmingDelivery ? { ...o, status: 'delivered' } : o
+      ));
+      if (selectedOrder && selectedOrder.id === confirmingDelivery) {
+        setSelectedOrder({ ...selectedOrder, status: 'delivered' });
+      }
+      setConfirmingDelivery(null);
+      setDeliveryCode('');
+      alert('✅ ' + t.deliveryConfirmed);
+    } else {
+      alert('❌ ' + t.wrongCode);
+    }
+  };
+
+  const handleAdminLogin = () => {
+    console.log('Email:', adminEmail);
+    console.log('Password:', adminPassword);
+    
+    if (adminPassword.trim() === 'wizardgoo1020' && adminEmail.trim() === 'elhocineboul@gmail.com') {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      setAdminPassword('');
+      setAdminEmail('');
+      setCurrentPage('admin');
+      alert('✅ Welcome Admin!');
+    } else {
+      alert('❌ Wrong credentials!\nEmail: elhocineboul@gmail.com\nPassword: wizardgoo1020');
+    }
+  };
+
+  const handleAddProduct = () => {
+    if (!newProduct.name || !newProduct.price) {
+      alert('Please fill required fields!');
+      return;
+    }
+
+    const product = {
+      id: Date.now(),
+      name: newProduct.name,
+      price: parseFloat(newProduct.price),
+      oldPrice: newProduct.oldPrice ? parseFloat(newProduct.oldPrice) : null,
+      rating: 4.5,
+      image: newProduct.image || 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=500&h=400&fit=crop',
+      category: newProduct.category,
+      badge: newProduct.badge || ''
+    };
+
+    setProducts([...products, product]);
+    setNewProduct({
+      name: '',
+      price: '',
+      oldPrice: '',
+      category: 'beef',
+      image: '',
+      badge: ''
+    });
+    alert('✅ Product added successfully!');
+  };
+
+  const handleUpdateProduct = () => {
+    if (!editingProduct) return;
+    
+    setProducts(products.map(p => 
+      p.id === editingProduct.id ? editingProduct : p
+    ));
+    setEditingProduct(null);
+    alert('✅ Product updated!');
+  };
+
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('Delete this product?')) {
+      setProducts(products.filter(p => p.id !== id));
+      alert('✅ Product deleted!');
+    }
+  };
+
+
+
+
+
+  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  const bg = darkMode ? 'bg-gray-900' : 'bg-white';
+  const text = darkMode ? 'text-white' : 'text-gray-800';
+  const card = darkMode ? 'bg-gray-800' : 'bg-white';
+  const bgGradient = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-green-50 to-emerald-50';
+
+  useEffect(() => {
+    if (selectedOrder) {
+      const matchingOrder = orders.find(o => o.id === selectedOrder.id);
+      if (matchingOrder && matchingOrder.status !== selectedOrder.status) {
+        setSelectedOrder(matchingOrder);
+      }
+    }
+  }, [orders, selectedOrder]);
+
+  return (
+    <div className={`max-w-md mx-auto ${bg} shadow-2xl h-screen overflow-hidden flex flex-col`}>
+      {editingSlide && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 overflow-y-auto">
+          <div className={`${card} rounded-2xl p-6 max-w-sm w-full my-8`}>
+            <div className="flex justify-between mb-4">
+              <h2 className={`text-xl font-bold ${text}`}>✏️ Edit Slide</h2>
+              <button onClick={() => setEditingSlide(null)} className={`w-8 h-8 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center`}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Title"
+                value={editingSlide.title}
+                onChange={(e) => setEditingSlide({...editingSlide, title: e.target.value})}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-purple-500 outline-none ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-800 border-gray-200'}`}
+              />
+              <input
+                type="text"
+                placeholder="Subtitle"
+                value={editingSlide.subtitle}
+                onChange={(e) => setEditingSlide({...editingSlide, subtitle: e.target.value})}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-purple-500 outline-none ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-800 border-gray-200'}`}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={editingSlide.description}
+                onChange={(e) => setEditingSlide({...editingSlide, description: e.target.value})}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-purple-500 outline-none ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-800 border-gray-200'}`}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="Discount"
+                  value={editingSlide.discount}
+                  onChange={(e) => setEditingSli
   </script>
 </body>
-  </html>
+</html>
