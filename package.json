@@ -1,0 +1,22 @@
+{
+  "name": "halal-store",
+  "version": "1.0.0",
+  "description": "Halal Store Mobile App with Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["halal", "store", "ecommerce", "postgresql"],
+  "author": "",
+  "license": "MIT"
+}
